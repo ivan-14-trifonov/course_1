@@ -1,3 +1,4 @@
+
 import subprocess
 import json
 import sys
@@ -8,10 +9,6 @@ from tkinter import *
 from tkinter import ttk, filedialog
 from tkcalendar import DateEntry
 import re
-
-
-# Variable for the folder path - change this to the desired path
-FOLDER_PATH = r"E:\2022"
 
 
 def run_powershell_command(folder_path):
@@ -62,19 +59,19 @@ def run_powershell_command(folder_path):
         return []
 
 
-def get_file_info_cross_platform(path=FOLDER_PATH):
+def get_file_info_cross_platform(folder_path):
     """
     Cross-platform alternative to PowerShell command for getting file information.
     Returns similar structure to PowerShell command.
     """
     results = []
     
-    if not os.path.exists(path):
-        print(f"Path {path} does not exist. This script needs to be run on Windows with that path available.")
+    if not os.path.exists(folder_path):
+        print(f"Path {folder_path} does not exist.")
         return []
     
     try:
-        path_obj = Path(path)
+        path_obj = Path(folder_path)
         for item in path_obj.rglob('*'):  # Recursively get all files and directories
             try:
                 stat = item.stat()
@@ -97,7 +94,7 @@ def get_file_info_cross_platform(path=FOLDER_PATH):
                 
         return results
     except Exception as e:
-        print(f"Error accessing path {path}: {e}")
+        print(f"Error accessing path {folder_path}: {e}")
         return []
 
 
@@ -149,6 +146,9 @@ class FileFilterApp:
         self.root.title("File Explorer with Filtering")
         self.root.geometry("1200x800")
         
+        # Путь к папке - теперь это атрибут класса
+        self.FOLDER_PATH = r"E:\2022"  # Значение по умолчанию
+        
         # Variables for filters
         self.name_var = StringVar()
         self.creation_from_var = StringVar()
@@ -177,55 +177,61 @@ class FileFilterApp:
         control_frame = LabelFrame(main_frame, text="Filters", padx=10, pady=10)
         control_frame.pack(fill=X, pady=(0, 10))
         
+        # Current folder label
+        self.folder_label = Label(control_frame, text=f"Current folder: {self.FOLDER_PATH}", 
+                                  font=("Arial", 10, "bold"), fg="blue")
+        self.folder_label.grid(row=0, column=0, columnspan=7, sticky=W, pady=(0, 10))
+        
         # Name filter
-        Label(control_frame, text="Name Pattern:").grid(row=0, column=0, sticky=W, padx=(0, 5))
+        Label(control_frame, text="Name Pattern:").grid(row=1, column=0, sticky=W, padx=(0, 5))
         self.name_entry = Entry(control_frame, textvariable=self.name_var, width=20)
-        self.name_entry.grid(row=0, column=1, padx=(0, 10))
+        self.name_entry.grid(row=1, column=1, padx=(0, 10))
         
         # Creation date filters
-        Label(control_frame, text="Creation From:").grid(row=0, column=2, sticky=W, padx=(10, 5))
+        Label(control_frame, text="Creation From:").grid(row=1, column=2, sticky=W, padx=(10, 5))
         self.creation_from_entry = DateEntry(control_frame, textvariable=self.creation_from_var, 
                                              date_pattern='yyyy-mm-dd', width=12)
-        self.creation_from_entry.grid(row=0, column=3, padx=(0, 5))
+        self.creation_from_entry.grid(row=1, column=3, padx=(0, 5))
         
-        Label(control_frame, text="To:").grid(row=0, column=4, sticky=W, padx=(5, 5))
+        Label(control_frame, text="To:").grid(row=1, column=4, sticky=W, padx=(5, 5))
         self.creation_to_entry = DateEntry(control_frame, textvariable=self.creation_to_var, 
                                            date_pattern='yyyy-mm-dd', width=12)
-        self.creation_to_entry.grid(row=0, column=5, padx=(0, 10))
+        self.creation_to_entry.grid(row=1, column=5, padx=(0, 10))
         
         # Modification date filters
-        Label(control_frame, text="Modified From:").grid(row=1, column=0, sticky=W, padx=(0, 5))
+        Label(control_frame, text="Modified From:").grid(row=2, column=0, sticky=W, padx=(0, 5))
         self.modified_from_entry = DateEntry(control_frame, textvariable=self.modified_from_var, 
                                              date_pattern='yyyy-mm-dd', width=12)
-        self.modified_from_entry.grid(row=1, column=1, padx=(0, 5))
-        
-        Label(control_frame, text="To:").grid(row=1, column=2, sticky=W, padx=(5, 5))
-        self.modified_to_entry = DateEntry(control_frame, textvariable=self.modified_to_var, 
-                                           date_pattern='yyyy-mm-dd', width=12)
-        self.modified_to_entry.grid(row=1, column=3, padx=(0, 5))
-        
-        # Access date filters
-        Label(control_frame, text="Accessed From:").grid(row=2, column=0, sticky=W, padx=(0, 5))
-        self.accessed_from_entry = DateEntry(control_frame, textvariable=self.accessed_from_var, 
-                                             date_pattern='yyyy-mm-dd', width=12)
-        self.accessed_from_entry.grid(row=2, column=1, padx=(0, 5))
+        self.modified_from_entry.grid(row=2, column=1, padx=(0, 5))
         
         Label(control_frame, text="To:").grid(row=2, column=2, sticky=W, padx=(5, 5))
+        self.modified_to_entry = DateEntry(control_frame, textvariable=self.modified_to_var, 
+                                           date_pattern='yyyy-mm-dd', width=12)
+        self.modified_to_entry.grid(row=2, column=3, padx=(0, 5))
+        
+        # Access date filters
+        Label(control_frame, text="Accessed From:").grid(row=3, column=0, sticky=W, padx=(0, 5))
+        self.accessed_from_entry = DateEntry(control_frame, textvariable=self.accessed_from_var, 
+                                             date_pattern='yyyy-mm-dd', width=12)
+        self.accessed_from_entry.grid(row=3, column=1, padx=(0, 5))
+        
+        Label(control_frame, text="To:").grid(row=3, column=2, sticky=W, padx=(5, 5))
         self.accessed_to_entry = DateEntry(control_frame, textvariable=self.accessed_to_var, 
                                            date_pattern='yyyy-mm-dd', width=12)
-        self.accessed_to_entry.grid(row=2, column=3, padx=(0, 5))
+        self.accessed_to_entry.grid(row=3, column=3, padx=(0, 5))
         
         # Buttons
         button_frame = Frame(control_frame)
-        button_frame.grid(row=0, column=6, rowspan=3, padx=(20, 0))
+        button_frame.grid(row=1, column=6, rowspan=3, padx=(20, 0))
         
-        Button(button_frame, text="Apply Filters", command=self.apply_filters).pack(pady=2)
-        Button(button_frame, text="Clear Filters", command=self.clear_filters).pack(pady=2)
-        Button(button_frame, text="Browse Folder", command=self.browse_folder).pack(pady=2)
+        Button(button_frame, text="Apply Filters", command=self.apply_filters, width=15).pack(pady=2)
+        Button(button_frame, text="Clear Filters", command=self.clear_filters, width=15).pack(pady=2)
+        Button(button_frame, text="Browse Folder", command=self.browse_folder, width=15).pack(pady=2)
+        Button(button_frame, text="Reload Data", command=self.load_data, width=15).pack(pady=2)
         
         # Results count label
-        self.results_label = Label(control_frame, text="Results: 0")
-        self.results_label.grid(row=3, column=0, columnspan=7, sticky=W, pady=(10, 0))
+        self.results_label = Label(control_frame, text="Results: 0", font=("Arial", 10, "bold"))
+        self.results_label.grid(row=4, column=0, columnspan=7, sticky=W, pady=(10, 0))
         
         # Treeview for displaying results
         tree_frame = Frame(main_frame)
@@ -256,30 +262,43 @@ class FileFilterApp:
         self.tree.pack(side=LEFT, fill=BOTH, expand=True)
     
     def load_data(self):
-        print(f"Loading data from {FOLDER_PATH}...")
+        """Load file information from the current folder"""
+        print(f"Loading data from {self.FOLDER_PATH}...")
+        
+        # Update folder label
+        self.folder_label.config(text=f"Current folder: {self.FOLDER_PATH}")
+        
+        # Clear current data
+        self.tree.delete(*self.tree.get_children())
+        self.results_label.config(text="Loading...")
+        self.root.update()
         
         # Check if running on Windows
         if sys.platform == "win32":
-            self.original_results = run_powershell_command(FOLDER_PATH)
+            self.original_results = run_powershell_command(self.FOLDER_PATH)
             if not self.original_results:
                 print("Trying cross-platform alternative...")
-                self.original_results = get_file_info_cross_platform()
+                self.original_results = get_file_info_cross_platform(self.FOLDER_PATH)
         else:
-            print(f"This script is designed to run on Windows where the {FOLDER_PATH} path and PowerShell are available.")
+            print(f"This script is designed to run on Windows where PowerShell is available.")
             print("Using cross-platform alternative to demonstrate functionality...")
-            # For demo purposes, we could create sample data here
-            self.original_results = get_file_info_cross_platform()
+            self.original_results = get_file_info_cross_platform(self.FOLDER_PATH)
         
         print(f"Loaded {len(self.original_results)} items")
         self.filtered_results = self.original_results[:]
         self.update_treeview()
+        
+        # Update results count
+        self.results_label.config(text=f"Results: {len(self.filtered_results)}")
     
     def browse_folder(self):
         """Allow user to select a folder to scan"""
-        folder_selected = filedialog.askdirectory(initialdir=FOLDER_PATH, title="Select folder to scan")
+        folder_selected = filedialog.askdirectory(
+            initialdir=self.FOLDER_PATH if os.path.exists(self.FOLDER_PATH) else "/",
+            title="Select folder to scan"
+        )
         if folder_selected:
-            global FOLDER_PATH
-            FOLDER_PATH = folder_selected
+            self.FOLDER_PATH = folder_selected  # Изменяем атрибут класса
             self.load_data()
     
     def apply_filters(self):
@@ -354,14 +373,15 @@ def main():
 
 
 if __name__ == "__main__":
-    # Install required packages if not already installed
+    # Check required packages
     try:
         import tkinter
         import tkcalendar
-    except ImportError:
-        print("Required packages not found. Please install them:")
-        print("pip install tkinter")
+    except ImportError as e:
+        print(f"Error importing required packages: {e}")
+        print("Please install required packages:")
         print("pip install tkcalendar")
         sys.exit(1)
     
+    # Run the application
     main()
