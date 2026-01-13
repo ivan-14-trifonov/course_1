@@ -5,15 +5,18 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+# Variable for the folder path - change this to the desired path
+FOLDER_PATH = r"E:\2022"
 
-def run_powershell_command():
+
+def run_powershell_command(folder_path):
     """
     Runs the PowerShell command to get file/folder information recursively
     and returns the results as a Python list of dictionaries.
     """
     # PowerShell command to get file/folder information
     ps_command = (
-        'Get-ChildItem -Path E:\\\\2022 -Recurse -Force | '
+        f'Get-ChildItem -Path "{folder_path}" -Recurse -Force | '
         'Select-Object FullName, CreationTime, LastWriteTime, LastAccessTime, Length | '
         'ConvertTo-Json -Depth 10'
     )
@@ -54,7 +57,7 @@ def run_powershell_command():
         return []
 
 
-def get_file_info_cross_platform(path="E:\\2022"):
+def get_file_info_cross_platform(path=FOLDER_PATH):
     """
     Cross-platform alternative to PowerShell command for getting file information.
     Returns similar structure to PowerShell command.
@@ -94,18 +97,18 @@ def get_file_info_cross_platform(path="E:\\2022"):
 
 
 def main():
-    print("Attempting to run PowerShell command to get file/folder information...")
+    print(f"Attempting to run PowerShell command to get file/folder information from {FOLDER_PATH}...")
     
     # Check if running on Windows
     if sys.platform == "win32":
-        results = run_powershell_command()
+        results = run_powershell_command(FOLDER_PATH)
         if results:
             print(f"Successfully retrieved {len(results)} items using PowerShell.")
         else:
             print("Trying cross-platform alternative...")
             results = get_file_info_cross_platform()
     else:
-        print("This script is designed to run on Windows where the E:\\2022 path and PowerShell are available.")
+        print(f"This script is designed to run on Windows where the {FOLDER_PATH} path and PowerShell are available.")
         print("Using cross-platform alternative to demonstrate functionality...")
         # Using a mock path for demonstration - change as needed
         import tempfile
